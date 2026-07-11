@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Portal do Engenheiro Mágico: O Reino das Super Estruturas!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --noite: #1B1830;
+            --pedra: #3D2B56;
+            --dourado: #E8B84B;
+            --runa: #5FA8A0;
+            --pergaminho: #F2EAD3;
+            --selo: #C64B4B;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--noite);
+            margin: 0;
+        }
+
+        .font-display { font-family: 'Cinzel', serif; }
+
+        /* Página: só precisa de altura, o céu de verdade vem da camada fixa abaixo */
+        .ceu-reino {
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Camada de céu FIXA — sempre visível atrás do conteúdo, dá profundidade real */
+        .fundo-magico-fixo {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            /* vinheta agora é uma camada do PRÓPRIO background, então nunca fica na frente das estrelas/lua */
+            background:
+                radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%),
+                linear-gradient(180deg, #B23E8C 0%, #E8632E 12%, #F5A623 22%, #7B3F8F 40%, #3D2470 58%, #1B1046 76%, #0A0620 100%);
+        }
+        .fundo-magico-fixo::before {
+            /* textura de grão sutil */
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 3px 3px;
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+        }
+
+        /* Hero do topo agora é transparente: deixa o céu fixo aparecer atrás do castelo */
+        .hero-topo {
+            position: relative;
+            overflow: hidden;
+            padding-top: 2.5rem;
+            padding-bottom: 0;
+        }
+
+        .montanhas-fundo { display: block; width: 100%; height: 130px; }
+        .castelo-elaborado { display: block; width: 100%; height: 200px; }
+
+        .estandarte-texto {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .placa-reino {
+            font-family: 'Cinzel', serif;
+            background: rgba(27, 24, 48, 0.75);
+            border: 1px solid rgba(232,184,75,0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Silhueta do castelo no topo, feita em CSS puro */
+        .skyline-castelo {
+            width: 100%;
+            height: 90px;
+            display: block;
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes cairEstrela {
+            0% { transform: translate(0,0); opacity: 0; }
+            4% { opacity: 1; }
+            18% { transform: translate(-230px, 170px); opacity: 0; }
+            100% { transform: translate(-230px, 170px); opacity: 0; }
+        }
+        @keyframes derivaHorizontal {
+            from { transform: translateX(-15vw); }
+            to { transform: translateX(115vw); }
+        }
+        @keyframes nevoaFlutuar {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(24px,-18px) scale(1.08); }
+        }
+        @keyframes auroraFluir {
+            0%, 100% { transform: translateX(0) rotate(-6deg); opacity: 0.55; }
+            50% { transform: translateX(40px) rotate(-3deg); opacity: 0.85; }
+        }
+        @keyframes cruzarCeu {
+            0% { transform: translate(-10vw, 12vh); opacity: 0; }
+            8% { opacity: 0.85; }
+            92% { opacity: 0.85; }
+            100% { transform: translate(112vw, 4vh); opacity: 0; }
+        }
+        @keyframes planarAsas {
+            0%, 100% { transform: translateY(0) rotate(-6deg) scaleX(1); }
+            50% { transform: translateY(-12px) rotate(6deg) scaleX(0.88); }
+        }
+        @keyframes subirPoeira {
+            0% { transform: translateY(0); opacity: 0; }
+            12% { opacity: 0.9; }
+            88% { opacity: 0.3; }
+            100% { transform: translateY(-60vh); opacity: 0; }
+        }
+        @keyframes luaPulsar {
+            0%, 100% { filter: drop-shadow(0 0 18px rgba(242,234,211,0.55)); }
+            50% { filter: drop-shadow(0 0 32px rgba(242,234,211,0.85)); }
+        }
+
+        /* Chão do reino no rodapé da página */
+        .chao-reino { display: block; width: 100%; height: 90px; }
+
+        @keyframes portalPulse {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.06); }
+        }
+        @keyframes girarAnel {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes girarAnelReverso {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        @keyframes subirFaisca {
+            0% { transform: translateY(0) scale(0.6); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translateY(-90px) scale(1); opacity: 0; }
+        }
+        @keyframes flutuar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+        @keyframes brilhoRuna { from { filter: drop-shadow(0 0 3px var(--runa)); } to { filter: drop-shadow(0 0 10px var(--runa)); } }
+
+        .animate-fadeIn { animation: fadeIn 0.4s ease-out; }
+        .btn-interact:active { animation: pulse 0.25s ease-in-out; }
+        .portal-glow { animation: portalPulse 3.5s ease-in-out infinite; }
+        .flutuando { animation: flutuar 4s ease-in-out infinite; }
+        .anel-runico { animation: girarAnel 24s linear infinite; transform-origin: 200px 140px; }
+        .anel-runico-interno { animation: girarAnelReverso 18s linear infinite; transform-origin: 200px 140px; }
+        .faisca { animation: subirFaisca 2.2s ease-in infinite; }
+
+        .balao-fala {
+            position: relative;
+            background: var(--pergaminho);
+            border: 2px solid #C9A96A;
+            border-radius: 14px;
+        }
+        .balao-fala::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            right: 24px;
+            width: 18px;
+            height: 18px;
+            background: var(--pergaminho);
+            border-right: 2px solid #C9A96A;
+            border-bottom: 2px solid #C9A96A;
+            transform: rotate(45deg);
+        }
+        .avatar-mago {
+            box-shadow: 0 0 0 3px var(--dourado), 0 0 0 6px rgba(232,184,75,0.3), 0 6px 16px rgba(0,0,0,0.5);
+        }
+
+        /* Nós-pai da árvore: placas de pedra gravada — moldura dupla funciona sobre qualquer cor de fundo */
+        .placa-pedra {
+            border-radius: 12px;
+            background-image: repeating-linear-gradient(135deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 9px);
+            box-shadow:
+                0 0 0 3px var(--pedra),
+                0 0 0 6px var(--dourado),
+                inset 0 0 16px rgba(0,0,0,0.3),
+                0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        /* Nós-folha da árvore: cartinhas de feitiço com selo bem visível */
+        .carta-feitico {
+            border-radius: 14px 14px 4px 4px;
+            box-shadow:
+                0 0 0 2px var(--pedra),
+                0 0 0 5px var(--dourado),
+                0 6px 14px rgba(0,0,0,0.4);
+        }
+        .carta-feitico::before {
+            content: "✦";
+            position: absolute;
+            top: -12px;
+            left: 12px;
+            width: 22px;
+            height: 22px;
+            background: var(--dourado);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(232,184,75,1), 0 0 0 3px var(--pergaminho);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--pedra);
+        }
+
+        /* Trilha rúnica conectando pai -> filhos: bem mais grossa e brilhante */
+        .trilha-runica { position: relative; }
+        .trilha-runica::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background-image: repeating-linear-gradient(to bottom, var(--runa) 0 10px, transparent 10px 18px);
+            border-radius: 3px;
+            filter: drop-shadow(0 0 4px var(--runa));
+        }
+
+        .losango-icone {
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* Botão-escudo dos dois reinos principais (Esqueleto / Músculo) */
+        .escudo-botao {
+            width: 150px;
+            height: 165px;
+            background: transparent;
+            padding: 0;
+            display: block;
+        }
+
+        .espada-botao {
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        @keyframes estourarFaisca {
+            0% { transform: translate(0,0) scale(0.4); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
+        }
+        @keyframes estourarBrilho {
+            0% { transform: scale(0.3); opacity: 0.95; }
+            100% { transform: scale(2.6); opacity: 0; }
+        }
+
+        /* Painel do Reino: anéis, coroas, cadeado, águias */
+        .anel-progresso circle.trilho { fill: none; stroke: rgba(0,0,0,0.35); }
+        .anel-progresso circle.preenchimento {
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .coroa-brilho { filter: drop-shadow(0 0 6px rgba(232,184,75,0.85)); }
+        .aguia-flutuante { animation: flutuar 6s ease-in-out infinite; }
+        .escudo-modulo-bloqueado { filter: grayscale(0.85) brightness(0.55); }
+
+        .magic-glow:hover {
+            box-shadow: 0 0 18px rgba(232, 184, 75, 0.55);
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Painel de pedra escura reforçada — substitui o antigo pergaminho claro */
+        .pergaminho {
+            background:
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 68px),
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 54px),
+                linear-gradient(155deg, #4a3568 0%, #302047 45%, #1c1428 100%);
+            border-radius: 12px;
+            box-shadow:
+                0 0 0 3px #1a1428,
+                0 0 0 6px #6b5a8a,
+                inset 0 0 50px rgba(0,0,0,0.55),
+                inset 0 2px 0 rgba(255,255,255,0.06),
+                0 12px 28px rgba(0,0,0,0.6);
+        }
+
+        .selo-titulo {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.04em;
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--pedra); }
+        ::-webkit-scrollbar-thumb { background: var(--dourado); border-radius: 6px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-fadeIn, .btn-interact:active, .portal-glow, .flutuando { animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+    const { useState } = React;
+
+    // Curiosidades Clássicas Pré-carregadas (Didáticas para 11 anos)
+    const curiosidadesMagicas = {
+        'root': 'A ponte mais longa do mundo tem mais de 160 quilômetros! 😲',
+        'tracao': 'Um único fio de seda de uma aranha forte pode parar um helicóptero se fosse tão grosso quanto um elástico de escritório! 🕷️➰',
+        'compressao': 'Os ossos das suas pernas são tão fortes que, se fossem feitos de concreto, seriam 4 vezes mais pesados! 🦵🧱',
+        'flexao': 'A Prancha de Salto em uma piscina sofre tanta flexão que ela se curva, mas é feita para não quebrar. É o equilíbrio perfeito entre elástico e duro! 📏🏊',
+        'torcao': 'Sabia que o tronco de uma árvore torce um pouco com o vento para não quebrar? É como uma toalha molhada mágica que se cura! 🌪️🌳',
+        'cisalhamento': 'O Efeito Tesoura é o que acontece em terremotos quando o chão desliza em direções opostas, tentando cortar os prédios ao meio. Mas nós, engenheiros, criamos apoios mágicos que deslizam! ✂️ Prédio: "Estátua!" ⚖️'
+    };
+
+    // Dados do nosso mapa mental didático
+    const estruturaDados = {
+        id: 'root',
+        title: '🏗️ O Portal das Super Estruturas!',
+        subtitle: 'Como os edifícios e as pontes ficam de pé?',
+        color: 'bg-[#3D2B56] hover:bg-[#4a3568]',
+        textColor: 'text-[#F2EAD3]',
+        children: [
+            {
+                id: 'analise',
+                title: '🦴 O Esqueleto (Análise Estrutural)',
+                subtitle: 'O Mundo Exterior',
+                color: 'bg-[#5FA8A0] hover:bg-[#4d938c]',
+                textColor: 'text-white',
+                description: 'A Análise Estrutural estuda como o prédio inteiro se equilibra para não cair, como se fosse o esqueleto de um corpo a lutar contra o vento e a gravidade.',
+                children: [
+                    {
+                        id: 'equilibrio',
+                        title: '⚖️ A Regra da Estátua',
+                        color: 'bg-[#DCEEEC] hover:bg-[#c9e3e0] border-[#5FA8A0]',
+                        textColor: 'text-[#2c4d49]',
+                        description: 'A regra de ouro de qualquer construção é ficar quieta! É como brincar ao "1, 2, 3, macaquinho do chinês". Podem vir empurrões de todos os lados, mas o edifício tem de ficar congelado.'
+                    },
+                    {
+                        id: 'forcas',
+                        title: '💨 Os Inimigos (Forças)',
+                        color: 'bg-[#DCEEEC] hover:bg-[#c9e3e0] border-[#5FA8A0]',
+                        textColor: 'text-[#2c4d49]',
+                        description: 'São as coisas que tentam deitar abaixo a estrutura. O peso do prédio, os carros, pessoas, o vento forte ou até os sismos a abanar tudo.'
+                    },
+                    {
+                        id: 'apoios',
+                        title: '👟 Os Pés no Chão (Apoios)',
+                        color: 'bg-[#DCEEEC] hover:bg-[#c9e3e0] border-[#5FA8A0]',
+                        textColor: 'text-[#2c4d49]',
+                        description: 'É a forma como o esqueleto se agarra à terra. Apoio fixo (sapatos colados) ou móvel (patins).'
+                    }
+                ]
+            },
+            {
+                id: 'resmat',
+                title: '💪 Os Músculos (Resistência)',
+                subtitle: 'O Mundo Interior',
+                color: 'bg-[#E8B84B] hover:bg-[#d6a83f]',
+                textColor: 'text-[#3D2B56]',
+                description: 'Olhamos para dentro da matéria! De que material o prédio precisa ser feito para aguentar os empurrões sem se partir ao meio?',
+                children: [
+                    {
+                        id: 'tensao',
+                        title: '😠 O "Stress" (Tensão)',
+                        color: 'bg-[#FBF0D2] hover:bg-[#f7e6b4] border-[#E8B84B]',
+                        textColor: 'text-[#5c4515]',
+                        description: 'A tensão é a força invisível que o material sente lá dentro dele quando é empurrado ou puxado.'
+                    },
+                    {
+                        id: 'deformacao',
+                        title: '🥨 Mudar de Forma',
+                        color: 'bg-[#FBF0D2] hover:bg-[#f7e6b4] border-[#E8B84B]',
+                        textColor: 'text-[#5c4515]',
+                        description: 'Se puxares um elástico, ele estica (volta ao normal). Se amassares plasticina, ela muda para sempre. A engenharia tenta fazer prédios agirem como elásticos super duros!'
+                    },
+                    {
+                        id: 'esforcos',
+                        title: '🦹 Os 5 Super Vilões',
+                        subtitle: 'Clica para ver os vilões!',
+                        color: 'bg-[#C64B4B] hover:bg-[#b33e3e]',
+                        textColor: 'text-white',
+                        description: 'Existem cinco formas diferentes de tentar destruir um material.',
+                        children: [
+                            { id: 'tracao', title: '🪢 Tração (Puxar)', color: 'bg-[#F7DEDE] border-[#C64B4B]', textColor: 'text-[#6b2323]', description: 'Tenta esticar a estrutura até ela rebentar. É exatamente o que acontece à corda num jogo do cabo de guerra.' },
+                            { id: 'compressao', title: '🧱 Compressão (Esmagar)', color: 'bg-[#F7DEDE] border-[#C64B4B]', textColor: 'text-[#6b2323]', description: 'É o vilão que aperta e tenta esmagar a estrutura. Pensa no que acontece se pisares um marshmallow!' },
+                            { id: 'flexao', title: '📏 Flexão (Dobrar)', color: 'bg-[#F7DEDE] border-[#C64B4B]', textColor: 'text-[#6b2323]', description: 'O vilão que tenta curvar a estrutura. As pranchas de saltos das piscinas sofrem muita flexão.' },
+                            { id: 'torcao', title: '🌪️ Torção (Girar)', color: 'bg-[#F7DEDE] border-[#C64B4B]', textColor: 'text-[#6b2323]', description: 'O vilão que torce a estrutura em direções opostas. Pensa em como fazes para torcer uma toalha molhada.' },
+                            { id: 'cisalhamento', title: '✂️ Cisalhamento (Cortar)', color: 'bg-[#F7DEDE] border-[#C64B4B]', textColor: 'text-[#6b2323]', description: 'São forças a deslizar em sentidos contrários coladas uma à outra. O efeito Tesoura!' }
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+
+    // Componente para representar cada "ramo" ou "folha" da árvore
+    // Escudo customizado dos dois reinos principais — metal, bisel, círculo técnico-mágico + emblema
+    const EscudoReino = ({ tipo }) => {
+        const esqueleto = tipo === 'esqueleto';
+        const corHex = esqueleto ? '#5FA8A0' : '#E8B84B';
+        const gradId = esqueleto ? 'gradEsqueleto' : 'gradMusculo';
+        const glowId = esqueleto ? 'glowEsqueleto' : 'glowMusculo';
+        return (
+            <svg viewBox="0 0 200 240" className="w-full h-full" style={{ filter: 'drop-shadow(0 10px 14px rgba(0,0,0,0.55))' }} xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#5a4478" />
+                        <stop offset="45%" stopColor="#3D2B56" />
+                        <stop offset="100%" stopColor="#221933" />
+                    </linearGradient>
+                    <radialGradient id={glowId} cx="50%" cy="40%" r="55%">
+                        <stop offset="0%" stopColor={corHex} stopOpacity="0.85" />
+                        <stop offset="100%" stopColor={corHex} stopOpacity="0" />
+                    </radialGradient>
+                </defs>
+
+                {/* corpo metálico do escudo */}
+                <path d="M100,10 L174,34 C174,96 170,154 100,220 C30,154 26,96 26,34 Z" fill={`url(#${gradId})`} stroke={corHex} strokeWidth="3.5" />
+                {/* bisel interno (brilho) */}
+                <path d="M100,22 L162,42 C162,96 158,146 100,204 C42,146 38,96 38,42 Z" fill="none" stroke={corHex} strokeWidth="1.5" opacity="0.55" />
+                {/* glow central */}
+                <ellipse cx="100" cy="100" rx="70" ry="70" fill={`url(#${glowId})`} />
+                {/* círculo técnico-mágico atrás do emblema */}
+                <circle cx="100" cy="96" r="46" fill="none" stroke={corHex} strokeWidth="1" strokeDasharray="3 5" opacity="0.75" />
+                <circle cx="100" cy="96" r="38" fill="none" stroke="#F2EAD3" strokeWidth="0.75" opacity="0.4" />
+
+                {esqueleto ? (
+                    <g>
+                        {/* caveira estilizada */}
+                        <ellipse cx="100" cy="86" rx="22" ry="24" fill="#F2EAD3" opacity="0.97" />
+                        <rect x="90" y="103" width="20" height="14" rx="2" fill="#F2EAD3" opacity="0.97" />
+                        <circle cx="91" cy="84" r="5" fill="#3D2B56" />
+                        <circle cx="109" cy="84" r="5" fill="#3D2B56" />
+                        <path d="M96,96 L100,102 L104,96" fill="none" stroke="#3D2B56" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        {/* linha de treliça estrutural (toque científico) */}
+                        <path d="M62,132 L100,112 L138,132 M100,112 L100,152" stroke={corHex} strokeWidth="2.2" opacity="0.85" fill="none" strokeLinecap="round" />
+                        <circle cx="62" cy="132" r="3.2" fill={corHex} />
+                        <circle cx="138" cy="132" r="3.2" fill={corHex} />
+                        <circle cx="100" cy="152" r="3.2" fill={corHex} />
+                    </g>
+                ) : (
+                    <g>
+                        {/* bíceps estilizado */}
+                        <path d="M78,120 C70,100 78,78 100,72 C122,78 130,100 122,120 C122,138 106,146 100,146 C94,146 78,138 78,120 Z" fill="#F2EAD3" opacity="0.97" />
+                        <path d="M88,96 C94,88 106,88 112,96" stroke="#3D2B56" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                        {/* setas de compressão apontando pro centro (os 2 vilões) */}
+                        <path d="M56,96 L74,100 M56,96 L64,88 M56,96 L64,104" stroke={corHex} strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M144,96 L126,100 M144,96 L136,88 M144,96 L136,104" stroke={corHex} strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    </g>
+                )}
+
+                {/* rebites nos cantos */}
+                <circle cx="40" cy="46" r="4" fill={corHex} stroke="#221933" strokeWidth="1" />
+                <circle cx="160" cy="46" r="4" fill={corHex} stroke="#221933" strokeWidth="1" />
+                <circle cx="34" cy="100" r="4" fill={corHex} stroke="#221933" strokeWidth="1" />
+                <circle cx="166" cy="100" r="4" fill={corHex} stroke="#221933" strokeWidth="1" />
+            </svg>
+        );
+    };
+
+    // Efeito de faísca: partículas explodindo (Reino do Esqueleto)
+    const EstouroFaisca = () => {
+        const particulas = Array.from({ length: 8 }).map((_, i) => {
+            const ang = (i / 8) * Math.PI * 2;
+            return { dx: (Math.cos(ang) * 62).toFixed(0) + 'px', dy: (Math.sin(ang) * 62).toFixed(0) + 'px', delay: ((i % 3) * 0.03) + 's' };
+        });
+        return (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                {particulas.map((p, i) => (
+                    <span key={i} className="absolute w-2 h-2 rounded-full"
+                        style={{ background: 'var(--runa)', boxShadow: '0 0 6px var(--runa)', '--dx': p.dx, '--dy': p.dy, animation: 'estourarFaisca 0.7s ease-out forwards', animationDelay: p.delay }} />
+                ))}
+            </div>
+        );
+    };
+
+    // Efeito de brilho: flash radial (Reino do Músculo)
+    const EstouroBrilho = () => (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full" style={{ background: 'radial-gradient(circle, rgba(232,184,75,0.9), transparent 70%)', animation: 'estourarBrilho 0.6s ease-out forwards' }} />
+        </div>
+    );
+
+    // Categoria de cada nó-folha, define qual metal a espada usa
+    const categoriaDoNo = (id) => {
+        if (['equilibrio', 'forcas', 'apoios'].includes(id)) return 'esqueleto';
+        if (['tensao', 'deformacao'].includes(id)) return 'musculo';
+        if (['tracao', 'compressao', 'flexao', 'torcao', 'cisalhamento'].includes(id)) return 'vilao';
+        return 'esqueleto';
+    };
+
+    const metaisPorCategoria = {
+        esqueleto: { grad: ['#F5F5F5', '#C9CDD3', '#8A8F98', '#4A4E57'], accent: '#5FA8A0', cabo: '#3a2a1e' },
+        musculo: { grad: ['#F0D9A8', '#C9975B', '#8B5A2B', '#5C3A1E'], accent: '#E8B84B', cabo: '#4a2f14' },
+        vilao: { grad: ['#7A7A84', '#3A3A42', '#1E1E23', '#0C0C0F'], accent: '#C64B4B', cabo: '#241414' }
+    };
+
+    // Card-espada: substitui totalmente o card retangular nos nós-folha
+    const EspadaCard = ({ node, onSelect }) => {
+        const categoria = categoriaDoNo(node.id);
+        const metal = metaisPorCategoria[categoria];
+        const gradId = `espadaGrad-${node.id}`;
+        const ehVilao = categoria === 'vilao';
+
+        return (
+            <button
+                onClick={() => onSelect(node)}
+                className="espada-botao btn-interact relative block w-full max-w-sm hover:-translate-x-1 transition-transform duration-300"
+                aria-label={node.title}
+            >
+                <svg viewBox="0 0 380 70" className="w-full h-auto block" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id={gradId} x1="10%" y1="0%" x2="90%" y2="100%">
+                            <stop offset="0%" stopColor={metal.grad[0]} />
+                            <stop offset="35%" stopColor={metal.grad[1]} />
+                            <stop offset="70%" stopColor={metal.grad[2]} />
+                            <stop offset="100%" stopColor={metal.grad[3]} />
+                        </linearGradient>
+                    </defs>
+
+                    {/* pomo */}
+                    <circle cx="15" cy="35" r="9" fill={`url(#${gradId})`} stroke="#1a1a1a" strokeWidth="1" />
+                    <circle cx="15" cy="35" r="4" fill={metal.accent} style={{ filter: `drop-shadow(0 0 3px ${metal.accent})` }} />
+
+                    {/* cabo com textura de couro */}
+                    <rect x="24" y="27" width="26" height="16" rx="3" fill={metal.cabo} />
+                    <line x1="29" y1="27" x2="29" y2="43" stroke="#000" strokeOpacity="0.35" strokeWidth="1.5" />
+                    <line x1="35" y1="27" x2="35" y2="43" stroke="#000" strokeOpacity="0.35" strokeWidth="1.5" />
+                    <line x1="41" y1="27" x2="41" y2="43" stroke="#000" strokeOpacity="0.35" strokeWidth="1.5" />
+                    <line x1="47" y1="27" x2="47" y2="43" stroke="#000" strokeOpacity="0.35" strokeWidth="1.5" />
+
+                    {/* guarda cruzada */}
+                    <rect x="52" y="10" width="7" height="50" rx="2" fill={`url(#${gradId})`} stroke="#1a1a1a" strokeWidth="1" />
+                    <circle cx="55.5" cy="10" r="4" fill={`url(#${gradId})`} stroke="#1a1a1a" strokeWidth="1" />
+                    <circle cx="55.5" cy="60" r="4" fill={`url(#${gradId})`} stroke="#1a1a1a" strokeWidth="1" />
+
+                    {/* lâmina */}
+                    <path d="M60,14 L330,21 L378,35 L330,49 L60,56 Z" fill={`url(#${gradId})`} stroke="#1a1a1a" strokeWidth="1.2" strokeLinejoin="round" />
+                    {/* friso central */}
+                    <line x1="66" y1="35" x2="355" y2="35" stroke="#000" strokeOpacity="0.25" strokeWidth="1.5" />
+                    {/* brilho diagonal (aço polido) */}
+                    <path d="M85,18 L110,17 L95,52 L75,53 Z" fill="#FFFFFF" opacity="0.25" />
+
+                    {ehVilao && (
+                        <path d="M62,15.5 L330,22 L378,35 L330,48 L62,54.5" fill="none" stroke="#C64B4B" strokeWidth="1.3" opacity="0.85" style={{ filter: 'drop-shadow(0 0 3px #C64B4B)' }} />
+                    )}
+                </svg>
+
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingLeft: '17%', paddingRight: '9%' }}>
+                    <span className="font-display font-bold text-xs sm:text-sm text-[#F2EAD3] text-center leading-tight" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6)' }}>
+                        {node.title}
+                    </span>
+                </div>
+            </button>
+        );
+    };
+
+    const TreeNode = ({ node, level, onSelect, expandedNodes, toggleNode }) => {
+        const isExpanded = expandedNodes[node.id];
+        const hasChildren = node.children && node.children.length > 0;
+        const isBordered = node.color.includes('border');
+        const [estouroCount, setEstouroCount] = useState(0);
+        const ehEscudoReino = node.id === 'analise' || node.id === 'resmat';
+
+        const handleClick = (e) => {
+            e.stopPropagation();
+            if (hasChildren) {
+                toggleNode(node.id);
+            }
+            if (node.description || !hasChildren) {
+                onSelect(node);
+            }
+            if (ehEscudoReino) {
+                setEstouroCount(c => c + 1);
+            }
+        };
+
+        if (ehEscudoReino) {
+            return (
+                <div className={`flex flex-col ${level > 0 ? 'trilha-runica ml-4 md:ml-8 mt-3 pl-5' : ''}`}>
+                    <button onClick={handleClick} className="escudo-botao btn-interact relative hover:-translate-y-1 transition-transform duration-300" aria-label={node.title}>
+                        <EscudoReino tipo={node.id === 'analise' ? 'esqueleto' : 'musculo'} />
+                        {estouroCount > 0 && (
+                            node.id === 'analise'
+                                ? <EstouroFaisca key={estouroCount} />
+                                : <EstouroBrilho key={estouroCount} />
+                        )}
+                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 px-3 text-center pointer-events-none">
+                            <div className="font-display font-bold text-sm text-[#F2EAD3] leading-tight" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.8)' }}>{node.title}</div>
+                            {node.subtitle && <div className="text-[10px] text-[#F2EAD3]/85 mt-0.5" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>{node.subtitle}</div>}
+                            <div className="mt-1 text-[9px] font-bold tracking-wide text-[#F2EAD3]/90 flex items-center gap-1.5">
+                                <span className="losango-icone inline-block w-2 h-2 bg-current transition-transform duration-300" style={{ transform: isExpanded ? 'rotate(45deg)' : 'rotate(0deg)' }}></span>
+                                {isExpanded ? 'FECHAR' : 'EXPANDIR'}
+                            </div>
+                        </div>
+                    </button>
+                    {hasChildren && isExpanded && (
+                        <div className="flex flex-col mt-2 animate-fadeIn">
+                            {node.children.map((child) => (
+                                <TreeNode key={child.id} node={child} level={level + 1} onSelect={onSelect} expandedNodes={expandedNodes} toggleNode={toggleNode} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (!hasChildren) {
+            // Nó-folha: vira uma espada, substitui totalmente o card retangular
+            return (
+                <div className={`flex flex-col ${level > 0 ? 'trilha-runica ml-4 md:ml-8 mt-3 pl-5' : ''}`}>
+                    <EspadaCard node={node} onSelect={onSelect} />
+                </div>
+            );
+        }
+
+        return (
+            <div className={`flex flex-col ${level > 0 ? 'trilha-runica ml-4 md:ml-8 mt-3 pl-5' : ''}`}>
+                <button
+                    onClick={handleClick}
+                    className={`relative text-left p-3 transition-all duration-200 transform hover:-translate-y-1 ${node.color} ${node.textColor} ${isBordered ? 'border-2' : ''} max-w-sm magic-glow btn-interact ${hasChildren ? 'placa-pedra' : 'carta-feitico'}`}
+                >
+                    <div className="font-bold text-lg selo-titulo">{node.title}</div>
+                    {node.subtitle && <div className="text-sm opacity-90">{node.subtitle}</div>}
+                    {hasChildren && (
+                        <div className="mt-2 text-xs font-bold flex items-center gap-2 opacity-90">
+                            <span
+                                className="losango-icone inline-block w-3.5 h-3.5 bg-current transition-transform duration-300"
+                                style={{ transform: isExpanded ? 'rotate(45deg)' : 'rotate(0deg)' }}
+                            ></span>
+                            <span className="text-sm">{isExpanded ? 'Fechar' : 'Expandir'}</span>
+                        </div>
+                    )}
+                </button>
+                {hasChildren && isExpanded && (
+                    <div className="flex flex-col mt-2 animate-fadeIn">
+                        {node.children.map((child) => (
+                            <TreeNode
+                                key={child.id}
+                                node={child}
+                                level={level + 1}
+                                onSelect={onSelect}
+                                expandedNodes={expandedNodes}
+                                toggleNode={toggleNode}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // ===== Camada de céu vivo (fixa, decorativa, atrás de todo o conteúdo) =====
+
+    const LuaMagica = () => (
+        <div className="absolute" style={{ top: '6%', right: '10%' }}>
+            <svg width="120" height="120" viewBox="0 0 120 120" style={{ animation: 'luaPulsar 6s ease-in-out infinite' }}>
+                <circle cx="60" cy="60" r="46" fill="#FBF6E8" opacity="0.98" />
+                <circle cx="44" cy="46" r="6" fill="#DCCBA0" opacity="0.55" />
+                <circle cx="74" cy="70" r="10" fill="#DCCBA0" opacity="0.45" />
+                <circle cx="80" cy="40" r="5" fill="#DCCBA0" opacity="0.45" />
+            </svg>
+        </div>
+    );
+
+    const CampoEstrelas = () => {
+        const estrelas = React.useMemo(() => Array.from({ length: 30 }).map(() => ({
+            top: (Math.random() * 80 + 2).toFixed(1) + '%',
+            left: (Math.random() * 100).toFixed(1) + '%',
+            size: (Math.random() * 2.5 + 2).toFixed(1) + 'px',
+            delay: (Math.random() * 4).toFixed(1) + 's',
+            dur: (2.5 + Math.random() * 3).toFixed(1) + 's'
+        })), []);
+        return (
+            <>
+                {estrelas.map((e, i) => (
+                    <span key={i} className="absolute rounded-full bg-[#FBF6E8]"
+                        style={{ top: e.top, left: e.left, width: e.size, height: e.size, boxShadow: '0 0 4px 1px rgba(251,246,232,0.8)', animation: `twinkle ${e.dur} ease-in-out infinite`, animationDelay: e.delay }} />
+                ))}
+            </>
+        );
+    };
+
+    const EstrelasCadentes = () => {
+        const cadentes = [
+            { top: '6%', left: '78%', delay: '0.5s', dur: '6.5s' },
+            { top: '14%', left: '42%', delay: '3.8s', dur: '7.5s' },
+            { top: '3%', left: '58%', delay: '7.2s', dur: '5.8s' }
+        ];
+        return (
+            <>
+                {cadentes.map((c, i) => (
+                    <span key={i} className="absolute" style={{ top: c.top, left: c.left, animation: `cairEstrela ${c.dur} ease-in infinite`, animationDelay: c.delay }}>
+                        <span className="block" style={{ width: '75px', height: '2px', background: 'linear-gradient(90deg, transparent, #F2EAD3)', transform: 'rotate(35deg)', boxShadow: '0 0 6px 1px rgba(242,234,211,0.8)' }} />
+                    </span>
+                ))}
+            </>
+        );
+    };
+
+    // Véus de aurora finos e ondulantes (substitui as antigas "bolhas" de névoa)
+    const VeusDeAurora = () => (
+        <>
+            <div className="absolute" style={{
+                top: '22%', left: '-5%', width: '65vw', height: '46px',
+                background: 'linear-gradient(90deg, transparent, rgba(95,168,160,0.5), transparent)',
+                filter: 'blur(12px)', animation: 'auroraFluir 12s ease-in-out infinite'
+            }} />
+            <div className="absolute" style={{
+                top: '38%', right: '-8%', width: '55vw', height: '38px',
+                background: 'linear-gradient(90deg, transparent, rgba(232,184,75,0.45), transparent)',
+                filter: 'blur(12px)', animation: 'auroraFluir 16s ease-in-out infinite reverse'
+            }} />
+        </>
+    );
+
+    const NuvensDeriva = () => (
+        <>
+            <div className="absolute" style={{ top: '10%', width: '220px', height: '40px', background: 'rgba(242,234,211,0.12)', borderRadius: '50%', filter: 'blur(6px)', animation: 'derivaHorizontal 55s linear infinite' }} />
+            <div className="absolute" style={{ top: '20%', width: '160px', height: '30px', background: 'rgba(242,234,211,0.08)', borderRadius: '50%', filter: 'blur(6px)', animation: 'derivaHorizontal 75s linear infinite', animationDelay: '-20s' }} />
+        </>
+    );
+
+    // Dragão com voo orgânico: elemento externo faz o trajeto, o interno faz o balanço/batida de asas
+    const CriaturaVoadora = () => (
+        <div className="absolute" style={{ animation: 'cruzarCeu 28s linear infinite', animationDelay: '5s' }}>
+            <div className="text-3xl opacity-85" style={{ animation: 'planarAsas 1.6s ease-in-out infinite' }}>
+                🐉
+            </div>
+        </div>
+    );
+
+    const PoeiraMagicaGlobal = () => {
+        const poeiras = [
+            { left: '12%', delay: '0s', dur: '6s' }, { left: '30%', delay: '1.5s', dur: '7s' },
+            { left: '50%', delay: '3s', dur: '5.5s' }, { left: '68%', delay: '0.8s', dur: '6.5s' },
+            { left: '85%', delay: '2.2s', dur: '7.5s' }, { left: '22%', delay: '4s', dur: '6s' }
+        ];
+        return (
+            <>
+                {poeiras.map((p, i) => (
+                    <span key={i} className="absolute rounded-full" style={{ bottom: '0%', left: p.left, width: '4px', height: '4px', background: 'var(--dourado)', boxShadow: '0 0 6px var(--dourado)', animation: `subirPoeira ${p.dur} ease-in-out infinite`, animationDelay: p.delay }} />
+                ))}
+            </>
+        );
+    };
+
+    // ===== Painel do Reino: escudos dos 6 módulos, coroas, anéis de progresso =====
+
+    // Escudo genérico e reutilizável — usado na galeria dos 6 reinos
+    const EscudoModulo = ({ id, nome, numero, metal, corHex, emblema, bloqueado }) => {
+        const gradId = `gradModulo-${id}`;
+        return (
+            <div className="flex flex-col items-center gap-2 w-24 sm:w-28 flex-shrink-0">
+                <div className={`relative w-full ${bloqueado ? 'escudo-modulo-bloqueado' : ''}`} style={{ filter: bloqueado ? undefined : 'drop-shadow(0 6px 10px rgba(0,0,0,0.5))' }}>
+                    <svg viewBox="0 0 200 240" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor={metal[0]} />
+                                <stop offset="40%" stopColor={metal[1]} />
+                                <stop offset="75%" stopColor={metal[2]} />
+                                <stop offset="100%" stopColor={metal[3]} />
+                            </linearGradient>
+                        </defs>
+                        <path d="M100,10 L174,34 C174,96 170,154 100,220 C30,154 26,96 26,34 Z" fill={`url(#${gradId})`} stroke={corHex} strokeWidth="3.5" />
+                        <path d="M100,22 L162,42 C162,96 158,146 100,204 C42,146 38,96 38,42 Z" fill="none" stroke={corHex} strokeWidth="1.5" opacity="0.5" />
+                        <circle cx="100" cy="96" r="46" fill="none" stroke={corHex} strokeWidth="1" strokeDasharray="3 5" opacity="0.7" />
+                        <g opacity={bloqueado ? 0.55 : 1}>{emblema(corHex)}</g>
+
+                        {bloqueado && (
+                            <g>
+                                <ellipse cx="70" cy="88" rx="11" ry="7" fill="none" stroke="#161018" strokeWidth="4.5" opacity="0.9" transform="rotate(-25 70 88)" />
+                                <ellipse cx="92" cy="102" rx="11" ry="7" fill="none" stroke="#161018" strokeWidth="4.5" opacity="0.9" transform="rotate(-25 92 102)" />
+                                <ellipse cx="114" cy="116" rx="11" ry="7" fill="none" stroke="#161018" strokeWidth="4.5" opacity="0.9" transform="rotate(-25 114 116)" />
+                                <ellipse cx="136" cy="130" rx="11" ry="7" fill="none" stroke="#161018" strokeWidth="4.5" opacity="0.9" transform="rotate(-25 136 130)" />
+                                <rect x="86" y="150" width="28" height="24" rx="4" fill="#F2EAD3" stroke="#161018" strokeWidth="2" />
+                                <path d="M90,150 L90,138 A10,10 0 0,1 110,138 L110,150" fill="none" stroke="#F2EAD3" strokeWidth="5" />
+                                <circle cx="100" cy="161" r="3" fill="#161018" />
+                            </g>
+                        )}
+                    </svg>
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#1a1428] border border-[#6b5a8a] rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold text-[#F2EAD3]">
+                        {numero}
+                    </div>
+                </div>
+                <span className="text-[10px] sm:text-xs font-display font-bold text-center text-[#F2EAD3] leading-tight">
+                    {bloqueado ? 'EM BREVE' : nome}
+                </span>
+            </div>
+        );
+    };
+
+    const configModulos = [
+        {
+            id: 'introducao', numero: 1, nome: 'Introdução', bloqueado: true,
+            metal: ['#D9C48A', '#A98F52', '#6B5730', '#3D3018'], corHex: '#8FA87A',
+            emblema: (cor) => (
+                <g>
+                    <circle cx="100" cy="70" r="4" fill="#F2EAD3" />
+                    <line x1="100" y1="70" x2="76" y2="132" stroke="#F2EAD3" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="100" y1="70" x2="124" y2="132" stroke="#F2EAD3" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="86" y1="112" x2="114" y2="112" stroke={cor} strokeWidth="2.5" />
+                    <circle cx="76" cy="134" r="3.5" fill={cor} />
+                    <circle cx="124" cy="134" r="3.5" fill={cor} />
+                </g>
+            )
+        },
+        {
+            id: 'sistemas', numero: 2, nome: 'Sistemas Construtivos', bloqueado: true,
+            metal: ['#E8A87C', '#C9714A', '#8B4A2B', '#5C2E18'], corHex: '#D9622C',
+            emblema: (cor) => (
+                <g>
+                    <rect x="72" y="118" width="24" height="14" rx="1" fill="#F2EAD3" opacity="0.92" />
+                    <rect x="98" y="118" width="24" height="14" rx="1" fill="#F2EAD3" opacity="0.92" />
+                    <rect x="85" y="104" width="24" height="14" rx="1" fill="#F2EAD3" opacity="0.92" />
+                    <path d="M70,70 L110,90 L104,102 L64,82 Z" fill={cor} />
+                    <line x1="66" y1="80" x2="52" y2="66" stroke="#F2EAD3" strokeWidth="4" strokeLinecap="round" />
+                </g>
+            )
+        },
+        {
+            id: 'analise', numero: 4, nome: 'Análise Estrutural', bloqueado: false,
+            metal: ['#F5F5F5', '#C9CDD3', '#8A8F98', '#4A4E57'], corHex: '#5FA8A0',
+            emblema: (cor) => (
+                <g>
+                    <ellipse cx="100" cy="86" rx="18" ry="19" fill="#F2EAD3" opacity="0.95" />
+                    <rect x="92" y="100" width="16" height="11" rx="2" fill="#F2EAD3" opacity="0.95" />
+                    <circle cx="93" cy="84" r="4" fill="#3D2B56" />
+                    <circle cx="107" cy="84" r="4" fill="#3D2B56" />
+                    <path d="M62,132 L100,114 L138,132" stroke={cor} strokeWidth="2.2" opacity="0.85" fill="none" strokeLinecap="round" />
+                </g>
+            )
+        },
+        {
+            id: 'mecanica', numero: 3, nome: 'Mecânica dos Sólidos', bloqueado: true,
+            metal: ['#B8C4D9', '#7A8CA8', '#4A5A75', '#2A3548'], corHex: '#4A90D9',
+            emblema: (cor) => (
+                <g>
+                    <path d="M58,112 L142,96" stroke="#F2EAD3" strokeWidth="5" strokeLinecap="round" />
+                    <path d="M100,112 L88,134 L112,134 Z" fill={cor} />
+                    <path d="M53,102 L58,88 L63,102" fill="none" stroke={cor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </g>
+            )
+        },
+        {
+            id: 'resmat', numero: 5, nome: 'Resistência dos Materiais', bloqueado: false,
+            metal: ['#F0D9A8', '#C9975B', '#8B5A2B', '#5C3A1E'], corHex: '#E8B84B',
+            emblema: (cor) => (
+                <g>
+                    <path d="M80,118 C73,100 80,80 100,75 C120,80 127,100 120,118 C120,134 106,141 100,141 C94,141 80,134 80,118 Z" fill="#F2EAD3" opacity="0.95" />
+                    <path d="M58,98 L74,102 M58,98 L66,90 M58,98 L66,106" stroke={cor} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+                    <path d="M142,98 L126,102 M142,98 L134,90 M142,98 L134,106" stroke={cor} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+                </g>
+            )
+        },
+        {
+            id: 'estruturas', numero: 6, nome: 'Estruturas', bloqueado: true,
+            metal: ['#9BA8D9', '#6674B0', '#3D4780', '#232952'], corHex: '#8AA0E8',
+            emblema: (cor) => (
+                <g>
+                    <path d="M64,124 Q100,76 136,124" fill="none" stroke="#F2EAD3" strokeWidth="6" strokeLinecap="round" />
+                    <line x1="64" y1="124" x2="64" y2="136" stroke={cor} strokeWidth="5" strokeLinecap="round" />
+                    <line x1="136" y1="124" x2="136" y2="136" stroke={cor} strokeWidth="5" strokeLinecap="round" />
+                    <line x1="100" y1="90" x2="100" y2="124" stroke={cor} strokeWidth="3" opacity="0.85" />
+                </g>
+            )
+        }
+    ];
+
+    const GaleriaReinos = () => (
+        <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 px-1 justify-start sm:justify-center">
+            {configModulos.map(m => (
+                <EscudoModulo key={m.id} id={m.id} nome={m.nome} numero={m.numero} metal={m.metal} corHex={m.corHex} emblema={m.emblema} bloqueado={m.bloqueado} />
+            ))}
+        </div>
+    );
+
+    // Coroa de conquista — acesa (conquistada) ou bloqueada
+    const Coroa = ({ acesa }) => (
+        <svg viewBox="0 0 60 50" className={`w-9 h-8 sm:w-11 sm:h-10 ${acesa ? 'coroa-brilho' : 'opacity-40'}`} xmlns="http://www.w3.org/2000/svg">
+            <path d="M8,40 L8,22 L18,32 L30,12 L42,32 L52,22 L52,40 Z" fill={acesa ? 'var(--dourado)' : '#5a5a62'} stroke="#1a1428" strokeWidth="1.5" strokeLinejoin="round" />
+            <rect x="8" y="40" width="44" height="7" rx="2" fill={acesa ? '#C9975B' : '#3a3a42'} stroke="#1a1428" strokeWidth="1.5" />
+            <circle cx="18" cy="30" r="2.6" fill={acesa ? '#F2EAD3' : '#787880'} />
+            <circle cx="30" cy="17" r="3.2" fill={acesa ? '#C64B4B' : '#787880'} />
+            <circle cx="42" cy="30" r="2.6" fill={acesa ? '#F2EAD3' : '#787880'} />
+        </svg>
+    );
+
+    const FaixaConquistas = () => {
+        const estados = [true, true, false, false, false, false];
+        return (
+            <div className="flex gap-2.5 sm:gap-4 justify-center flex-wrap">
+                {estados.map((acesa, i) => <Coroa key={i} acesa={acesa} />)}
+            </div>
+        );
+    };
+
+    // Águia heráldica decorativa (silhueta estilizada, sem depender de imagem externa)
+    const AguiaDecorativa = ({ espelhada }) => (
+        <svg viewBox="0 0 120 100" className="aguia-flutuante w-16 sm:w-20 h-auto opacity-90" style={{ transform: espelhada ? 'scaleX(-1)' : 'none' }} xmlns="http://www.w3.org/2000/svg">
+            <path d="M60,88 C56,72 50,62 34,56 C14,50 4,34 2,14 C16,19 26,25 33,35 C37,42 41,48 46,52 L60,42 L74,52 C79,48 83,42 87,35 C94,25 104,19 118,14 C116,34 106,50 86,56 C70,62 64,72 60,88 Z"
+                fill="var(--dourado)" opacity="0.92" />
+            <circle cx="60" cy="40" r="6.5" fill="var(--dourado)" />
+            <path d="M60,32 L55,24 L60,27 L65,24 Z" fill="var(--dourado)" />
+        </svg>
+    );
+
+    // Anel de progresso circular animado
+    const AnelProgresso = ({ percentual, cor, label, valorTexto }) => {
+        const [animado, setAnimado] = useState(0);
+        React.useEffect(() => {
+            const t = setTimeout(() => setAnimado(percentual), 150);
+            return () => clearTimeout(t);
+        }, [percentual]);
+        const r = 42;
+        const circ = 2 * Math.PI * r;
+        const offset = circ - (animado / 100) * circ;
+        return (
+            <div className="flex flex-col items-center gap-2">
+                <svg viewBox="0 0 100 100" className="w-24 h-24 sm:w-28 sm:h-28 anel-progresso" xmlns="http://www.w3.org/2000/svg">
+                    <circle className="trilho" cx="50" cy="50" r={r} strokeWidth="9" />
+                    <circle className="preenchimento" cx="50" cy="50" r={r} strokeWidth="9" stroke={cor}
+                        strokeDasharray={circ} strokeDashoffset={offset} transform="rotate(-90 50 50)"
+                        style={{ filter: `drop-shadow(0 0 5px ${cor})` }} />
+                    <text x="50" y="56" textAnchor="middle" fontSize="20" fontWeight="bold" fill="#F2EAD3" fontFamily="Cinzel, serif">{valorTexto}</text>
+                </svg>
+                <span className="text-xs sm:text-sm font-display font-bold text-[#F2EAD3] text-center">{label}</span>
+            </div>
+        );
+    };
+
+    const CardTempo = () => (
+        <div className="flex flex-col items-center gap-2">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center gap-1" style={{ background: 'radial-gradient(circle, rgba(232,184,75,0.15), transparent 75%)', border: '3px solid rgba(232,184,75,0.5)' }}>
+                <span className="text-3xl">⏳</span>
+                <span className="text-lg font-display font-bold text-[#F2EAD3]">23 min</span>
+            </div>
+            <span className="text-xs sm:text-sm font-display font-bold text-[#F2EAD3] text-center">Tempo no Reino</span>
+        </div>
+    );
+
+    const PainelDoReino = () => (
+        <section className="pergaminho relative p-5 sm:p-8 mb-8 mx-1">
+            <div className="absolute -top-6 left-2 sm:left-6"><AguiaDecorativa /></div>
+            <div className="absolute -top-6 right-2 sm:right-6"><AguiaDecorativa espelhada /></div>
+
+            <h2 className="font-display text-xl sm:text-2xl font-bold text-[#F2EAD3] text-center mb-1 tracking-wide">
+                📜 Painel do Reino
+            </h2>
+            <p className="text-center text-[#F2EAD3]/60 text-xs mb-6 italic">(mostrando dados de exemplo por enquanto)</p>
+
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-10 mb-8">
+                <AnelProgresso percentual={33} cor="var(--runa)" label="Reino Explorado" valorTexto="33%" />
+                <AnelProgresso percentual={80} cor="var(--dourado)" label="Precisão nos Desafios" valorTexto="80%" />
+                <CardTempo />
+            </div>
+
+            <h3 className="font-display text-base sm:text-lg font-bold text-[#F2EAD3]/90 text-center mb-3">🏆 Conquistas</h3>
+            <div className="mb-8"><FaixaConquistas /></div>
+
+            <h3 className="font-display text-base sm:text-lg font-bold text-[#F2EAD3]/90 text-center mb-4">Os 6 Reinos do Conhecimento</h3>
+            <GaleriaReinos />
+        </section>
+    );
+
+    const FundoMagico = () => (
+        <div className="fundo-magico-fixo" aria-hidden="true">
+            <LuaMagica />
+            <CampoEstrelas />
+            <EstrelasCadentes />
+            <VeusDeAurora />
+            <NuvensDeriva />
+            <CriaturaVoadora />
+            <PoeiraMagicaGlobal />
+        </div>
+    );
+
+    // Chão do reino: ancora visualmente o rodapé da página
+    const ChaoDoReino = () => (
+        <svg viewBox="0 0 1200 100" preserveAspectRatio="none" className="chao-reino relative z-10" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,100 L0,55 Q60,35 120,50 T240,45 T360,55 T480,40 T600,52 T720,42 T840,55 T960,45 T1080,50 T1200,48 L1200,100 Z" fill="var(--pedra)" />
+            <path d="M0,100 L0,75 Q100,60 200,72 T400,68 T600,75 T800,65 T1000,72 T1200,70 L1200,100 Z" fill="#241a35" />
+        </svg>
+    );
+
+    // Camada de montanhas ao fundo da hero (dois tons, profundidade)
+    const MontanhasFundo = () => (
+        <svg className="montanhas-fundo" viewBox="0 0 1200 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,130 L0,80 L150,25 L300,75 L430,15 L600,80 L760,30 L900,85 L1050,20 L1200,70 L1200,130 Z"
+                  fill="#4a3568" opacity="0.55" />
+            <path d="M0,130 L0,100 L180,50 L360,95 L520,45 L700,100 L880,55 L1050,100 L1200,60 L1200,130 Z"
+                  fill="#3D2B56" opacity="0.8" />
+        </svg>
+    );
+
+    // Silhueta de castelo gótico elaborado (torres assimétricas, sem depender de imagem externa)
+    const CasteloElaborado = () => (
+        <svg className="castelo-elaborado" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+            {/* muralha base */}
+            <path d="M0,200 L0,140 L1200,140 L1200,200 Z" fill="var(--pedra)" />
+            {/* torres laterais menores */}
+            <path d="M60,140 L60,95 L80,95 L80,75 L95,75 L95,95 L115,95 L115,140 Z" fill="var(--pedra)" />
+            <path d="M1030,140 L1030,100 L1050,100 L1050,80 L1065,80 L1065,100 L1085,100 L1085,140 Z" fill="var(--pedra)" />
+            {/* torre gótica central alta (assimétrica, como na referência) */}
+            <path d="M480,140 L480,60 L505,60 L505,35 L520,35 L520,15 L535,35 L535,60 L560,60 L560,45 L575,45 L575,60 L600,60 L600,140 Z"
+                  fill="#4a3568" />
+            {/* corpo gótico com arcos (janelas ogivais) */}
+            <rect x="330" y="140" width="340" height="60" fill="#4a3568" />
+            <path d="M370,140 L370,105 Q380,90 390,105 L390,140 Z" fill="var(--dourado)" opacity="0.85" />
+            <path d="M420,140 L420,100 Q432,82 444,100 L444,140 Z" fill="var(--dourado)" opacity="0.85" />
+            <path d="M470,140 L470,95 Q485,74 500,95 L500,140 Z" fill="var(--dourado)" opacity="0.9" />
+            <path d="M530,140 L530,100 Q542,82 554,100 L554,140 Z" fill="var(--dourado)" opacity="0.85" />
+            <path d="M580,140 L580,105 Q590,90 600,105 L600,140 Z" fill="var(--dourado)" opacity="0.85" />
+            {/* torres médias com telhado cônico */}
+            <path d="M200,140 L200,85 L225,60 L250,85 L250,140 Z" fill="var(--pedra)" />
+            <path d="M760,140 L760,80 L790,50 L820,80 L820,140 Z" fill="var(--pedra)" />
+            {/* ameias (merlons) no topo da muralha */}
+            {[0,1,2,3,4,5,6,7,8,9,10,11].map(i => (
+                <rect key={i} x={100 + i * 90} y="130" width="18" height="12" fill="var(--pedra)" />
+            ))}
+        </svg>
+    );
+
+    // Estandarte / faixa com o título do reino
+    const EstandarteTitulo = () => (
+        <div className="relative flex justify-center -mb-2 z-10">
+            <svg viewBox="0 0 480 90" className="w-full max-w-lg drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20,20 L460,20 L440,45 L460,70 L20,70 L40,45 Z" fill="var(--selo)" stroke="#8f3535" strokeWidth="2" />
+                <path d="M0,25 L20,20 L20,70 L0,65 Z" fill="#8f3535" />
+                <path d="M480,25 L460,20 L460,70 L480,65 Z" fill="#8f3535" />
+                <text x="240" y="40" textAnchor="middle" className="estandarte-texto" fill="#F2EAD3" fontSize="15">O GRANDE REINO</text>
+                <text x="240" y="60" textAnchor="middle" className="estandarte-texto" fill="#F2EAD3" fontSize="15">DAS ESTRUTURAS</text>
+            </svg>
+        </div>
+    );
+
+    // Placa lateral identificando cada "reino" (liga aos ramos já existentes: analise / resmat)
+    const PlacaReino = ({ emoji, nome, subtitulo, lado }) => (
+        <div className={`hidden md:flex placa-reino absolute top-6 ${lado === 'esquerda' ? 'left-4' : 'right-4'} flex-col items-center px-4 py-2 rounded-lg text-center max-w-[180px]`}>
+            <span className="text-2xl">{emoji}</span>
+            <span className="text-[#F2EAD3] text-sm font-bold leading-tight">{nome}</span>
+            <span className="text-[#F2EAD3]/70 text-[11px] leading-tight">{subtitulo}</span>
+        </div>
+    );
+
+    // Portal mágico central — moldura de pedra, anéis rúnicos girando e faíscas subindo
+    const PortalMagico = ({ onClick }) => (
+        <div onClick={onClick} className="relative flex items-center justify-center py-10 cursor-pointer select-none">
+            <svg viewBox="0 0 400 260" className="w-full max-w-md portal-glow" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="portalGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#E8B84B" stopOpacity="0.9" />
+                        <stop offset="55%" stopColor="#5FA8A0" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#1B1830" stopOpacity="0" />
+                    </radialGradient>
+                </defs>
+
+                {/* moldura de pedra externa */}
+                <circle cx="200" cy="140" r="112" fill="none" stroke="var(--pedra)" strokeWidth="14" opacity="0.9" />
+                <circle cx="200" cy="140" r="112" fill="none" stroke="#5a4478" strokeWidth="3" opacity="0.6" />
+                {[...Array(8)].map((_, i) => {
+                    const ang = (i * Math.PI * 2) / 8;
+                    const x = 200 + Math.cos(ang) * 112;
+                    const y = 140 + Math.sin(ang) * 112;
+                    return <circle key={i} cx={x} cy={y} r="7" fill="var(--pedra)" stroke="#5a4478" strokeWidth="1.5" />;
+                })}
+
+                <ellipse cx="200" cy="140" rx="95" ry="95" fill="url(#portalGrad)" />
+
+                {/* anel rúnico externo girando */}
+                <g className="anel-runico">
+                    <circle cx="200" cy="140" r="90" fill="none" stroke="#E8B84B" strokeWidth="2" strokeDasharray="4 10" opacity="0.85" />
+                </g>
+                {/* anel rúnico interno girando em sentido oposto */}
+                <g className="anel-runico-interno">
+                    <circle cx="200" cy="140" r="65" fill="none" stroke="#F2EAD3" strokeWidth="1.5" strokeDasharray="2 8" opacity="0.6" />
+                </g>
+
+                <text x="200" y="150" textAnchor="middle" fontSize="52">🧙</text>
+
+                {/* faíscas subindo */}
+                {[
+                    { x: 150, delay: '0s' }, { x: 200, delay: '0.7s' },
+                    { x: 250, delay: '1.4s' }, { x: 175, delay: '2s' }
+                ].map((f, i) => (
+                    <circle key={i} className="faisca" cx={f.x} cy="180" r="3" fill="var(--dourado)" style={{ animationDelay: f.delay }} />
+                ))}
+            </svg>
+            <div className="absolute bottom-2 text-center text-[#F2EAD3] font-display text-sm tracking-widest opacity-80">
+                TOQUE NO PORTAL
+            </div>
+        </div>
+    );
+
+    // Runas flutuantes decorativas (clicáveis, ligadas às curiosidades)
+    const runas = [
+        { id: 'tracao', emoji: '🪢', top: '10%', left: '8%', delay: '0s' },
+        { id: 'compressao', emoji: '🧱', top: '65%', left: '5%', delay: '1s' },
+        { id: 'flexao', emoji: '📏', top: '15%', left: '90%', delay: '0.5s' },
+        { id: 'torcao', emoji: '🌪️', top: '70%', left: '92%', delay: '1.5s' },
+    ];
+
+    const RunasFlutuantes = ({ onSelect }) => (
+        <>
+            {runas.map(r => (
+                <div
+                    key={r.id}
+                    onClick={() => onSelect(r.id)}
+                    className="hidden md:flex flutuando absolute text-3xl cursor-pointer items-center justify-center w-14 h-14 rounded-full bg-[#3D2B56]/60 border border-[#5FA8A0] hover:scale-110 transition-transform"
+                    style={{ top: r.top, left: r.left, animationDelay: r.delay }}
+                    title="Toque para uma curiosidade mágica"
+                >
+                    {r.emoji}
+                </div>
+            ))}
+        </>
+    );
+
+    // Falas do Mago Aurelius: dicas, incentivos e piadinhas de engenharia
+    const falasAurelius = [
+        'Psst! Toque no Portal Central para descobrir segredos do reino! ✨',
+        'Sabia que até os castelos mais fortes precisam de boa fundação? Como você! 🏰',
+        'Errar um desafio não é derrota, é treino de mago! Tente de novo! 🔮',
+        'Os melhores engenheiros começaram exatamente como você: curiosos! 📜',
+        'Toque nas runas flutuantes pelo mapa — elas guardam curiosidades! 🪄',
+        'Um bom engenheiro observa o mundo real e pergunta: "por que isso não cai?" 🤔',
+        'Continue explorando o mapa! Cada bloco é um novo feitiço aprendido. ⚡'
+    ];
+
+    const MagoAurelius = ({ falaAtual, onClique }) => (
+        <div className="fixed bottom-4 right-4 z-50 flex items-end gap-3 max-w-[90vw]">
+            <div className="balao-fala hidden sm:block p-3 max-w-[220px] animate-fadeIn shadow-lg">
+                <p className="text-[#3D2B56] text-sm font-semibold leading-snug">{falaAtual}</p>
+            </div>
+            <button
+                onClick={onClique}
+                title="Toque para falar com o Mago Aurelius"
+                className="avatar-mago btn-interact flutuando flex-shrink-0 w-16 h-16 rounded-full bg-[#3D2B56] flex items-center justify-center text-3xl hover:scale-110 transition-transform"
+                style={{ animationDuration: '5s' }}
+            >
+                🧙‍♂️
+            </button>
+        </div>
+    );
+
+    function App() {
+        const [selectedConcept, setSelectedConcept] = useState(estruturaDados);
+        const [expandedNodes, setExpandedNodes] = useState({ root: true, analise: true, resmat: true });
+        const [curiosidadeMágica, setCuriosidadeMágica] = useState('');
+        const [quizMensagem, setQuizMensagem] = useState('');
+        const [falaAureliusIndex, setFalaAureliusIndex] = useState(0);
+
+        const proximaFalaAurelius = () => {
+            setFalaAureliusIndex(prev => (prev + 1) % falasAurelius.length);
+        };
+
+        const toggleNode = (id) => {
+            setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
+        };
+
+        const mostrarCuriosidade = (conceptId) => {
+            setCuriosidadeMágica(curiosidadesMagicas[conceptId] || curiosidadesMagicas['root']);
+        };
+
+        const responderQuiz = (resposta) => {
+            if (resposta === 'compressão') {
+                setQuizMensagem('🎉 CORRETO, Pequeno Engenheiro! Você é Mágico! 🎉');
+            } else {
+                setQuizMensagem('Tente de novo! 🤔 Pense no que acontece quando você pisa em algo...');
+            }
+        };
+
+        return (
+            <div className="ceu-reino relative">
+                <FundoMagico />
+
+                {/* HERO MEDIEVAL DO TOPO */}
+                <header className="hero-topo relative z-10">
+                    <PlacaReino emoji="🦴" nome="Reino do Esqueleto" subtitulo="Análise Estrutural" lado="esquerda" />
+                    <PlacaReino emoji="💪" nome="Reino do Músculo" subtitulo="Resistência dos Materiais" lado="direita" />
+                    <EstandarteTitulo />
+                    <MontanhasFundo />
+                    <CasteloElaborado />
+                </header>
+
+                <div className="relative z-10 max-w-6xl mx-auto px-2 pt-8">
+                    <PainelDoReino />
+                </div>
+
+                <RunasFlutuantes onSelect={mostrarCuriosidade} />
+                <MagoAurelius falaAtual={falasAurelius[falaAureliusIndex]} onClique={proximaFalaAurelius} />
+
+                <div className="relative z-10 min-h-screen p-4 md:p-8 flex flex-col md:flex-row gap-8 max-w-7xl mx-auto">
+
+                    {/* Área da Árvore (Mapa Mental) */}
+                    <div className="flex-1 overflow-x-auto pb-4 relative">
+                        <PortalMagico onClick={() => mostrarCuriosidade('root')} />
+
+                        <p className="text-[#F2EAD3] mb-6 italic text-lg leading-relaxed pergaminho p-4">
+                            Bem-vindo ao Reino Mágico! Toque no portal para uma curiosidade, nas runas flutuantes pelo caminho, ou explore os blocos coloridos abaixo para desvendar os segredos da engenharia.
+                        </p>
+
+                        <div className="pergaminho p-6">
+                            <TreeNode
+                                node={estruturaDados}
+                                level={0}
+                                onSelect={(node) => { setSelectedConcept(node); mostrarCuriosidade(node.id); }}
+                                expandedNodes={expandedNodes}
+                                toggleNode={toggleNode}
+                            />
+                        </div>
+
+                        {/* CURIOSIDADE MÁGICA (Abaixo do Mapa) */}
+                        {curiosidadeMágica && (
+                            <div className="mt-8 bg-[#3D2B56] border border-[#5FA8A0] p-5 rounded-2xl relative shadow-inner animate-fadeIn">
+                                <div className="absolute -top-3 -left-3 text-3xl">✨</div>
+                                <p className="text-[#F2EAD3] font-medium leading-relaxed text-lg">
+                                    {curiosidadeMágica}
+                                </p>
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* Área de Detalhes (O que foi clicado) */}
+                    <div className="md:w-1/3 flex-shrink-0 relative">
+                        <div className="sticky top-8 pergaminho overflow-hidden flex flex-col h-auto min-h-[400px]">
+
+                            <div className="p-4 bg-[#3D2B56] transition-colors duration-300">
+                                <h2 className="text-2xl font-display font-bold text-[#F2EAD3]">
+                                    {selectedConcept.title}
+                                </h2>
+                            </div>
+
+                            <div className="p-6 flex-1">
+                                {selectedConcept.description ? (
+                                    <p className="text-lg text-[#F2EAD3] leading-relaxed">
+                                        {selectedConcept.description}
+                                    </p>
+                                ) : (
+                                    <p className="text-lg text-[#F2EAD3]/50 italic text-center mt-10">
+                                        Nenhuma descrição disponível para este nível. Clica nas opções mais específicas!
+                                    </p>
+                                )}
+
+                                {/* Ilustrações em emoji */}
+                                <div className="mt-8 flex justify-center text-6xl drop-shadow-md">
+                                    {selectedConcept.id.includes('tracao') && '🪢'}
+                                    {selectedConcept.id.includes('compressao') && '🧱'}
+                                    {selectedConcept.id.includes('flexao') && '📏'}
+                                    {selectedConcept.id.includes('torcao') && '🌪️'}
+                                    {selectedConcept.id.includes('cisalhamento') && '✂️'}
+                                    {selectedConcept.id.includes('equilibrio') && '⚖️'}
+                                    {selectedConcept.id.includes('forcas') && '💨'}
+                                    {selectedConcept.id.includes('tensao') && '😠'}
+                                    {selectedConcept.id.includes('deformacao') && '🥨'}
+                                </div>
+
+                                {/* DESAFIO DO ENGENHEIRO MÁGICO */}
+                                <div className="mt-12 pt-6 border-t-2 border-dashed border-[#C9A96A] overflow-y-auto max-h-96">
+                                    <h3 className="text-2xl font-display font-bold text-[#F2EAD3] mb-4 flex items-center gap-2">
+                                        <span className="text-3xl">🎲</span> Desafio do Engenheiro Mágico!
+                                    </h3>
+                                    <p className="text-[#F2EAD3] mb-4 font-medium text-lg">
+                                        Um marshmallow gigante está segurando o teto de um prédio mágico! Qual super vilão está tentando esmagar o marshmallow? 🤔
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button onClick={() => responderQuiz('tração')} className="p-3 bg-[#F7DEDE] hover:bg-[#f0c6c6] text-[#6b2323] font-bold rounded-xl btn-interact border-2 border-[#C64B4B]">O vilão Tração! (Puxar)</button>
+                                        <button onClick={() => responderQuiz('compressão')} className="p-3 bg-[#F7DEDE] hover:bg-[#f0c6c6] text-[#6b2323] font-bold rounded-xl btn-interact border-2 border-[#C64B4B]">O vilão Compressão! (Esmagar)</button>
+                                    </div>
+                                    {quizMensagem && (
+                                        <div className="mt-4 bg-[#FBF0D2] border border-[#E8B84B] p-4 rounded-xl text-center font-bold text-[#5c4515] text-lg animate-fadeIn">
+                                            {quizMensagem}
+                                        </div>
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <div className="p-4 bg-[#3D2B56] text-center text-sm font-semibold text-[#F2EAD3]/80 border-t border-[#C9A96A]/40 mt-auto">
+                                👆 Selecione outro bloco no mapa para ler mais!
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <ChaoDoReino />
+            </div>
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+
+</body>
+</html>
